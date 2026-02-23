@@ -1,10 +1,8 @@
-mod throw;
+mod core;
 
-use crate::throw::throw::Throw;
+use crate::core::game::Game;
 
 fn main() {
-    for s in 0..=20 {
-        let step = Throw::new();
-        println!("Step #{}: First {}, Second: {}, Jackpot: {}", s, step.first, step.second, step.is_jackpot)
-    }
+    let _ = Game::new();    
+    println!("Game initizlized!");
 }

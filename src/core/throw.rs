@@ -1,0 +1,20 @@
+use super::dice::Dice;
+
+const DICES: usize = 2;
+
+pub struct Throw {
+    dices: [u8; DICES],
+    is_jackpot: bool
+}
+
+impl Throw {
+    pub fn new() -> Self {
+        let dices = [Dice::roll(); DICES];
+        let is_jackpot = dices[0].eq(&dices[1]);
+        
+        Self {
+            dices: dices,
+            is_jackpot: is_jackpot
+        }
+    }
+}
