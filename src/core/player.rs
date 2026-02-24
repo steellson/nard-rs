@@ -1,13 +1,14 @@
 use super::sector::Placement;
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Side {
     Black, White
 }
 
+#[derive(Debug)]
 pub struct Player {
-    side: Side,
-    final_sector: Placement
+    pub side: Side,
+    pub final_sector: Placement
 }
 
 impl Player {

@@ -6,9 +6,9 @@ pub const SIDE_CHIPS: usize = 15;
 const ALL_CHIPS: usize = 30;
 const SECTORS: usize = 4;
 
+#[derive(Debug)]
 pub struct Deck {
-    chips: [Chip; ALL_CHIPS],
-    sectors: [Sector; SECTORS]
+    pub sectors: [Sector; SECTORS]
 }
 
 impl Deck {
@@ -21,7 +21,6 @@ impl Deck {
         chips[SIDE_CHIPS..].copy_from_slice(&black);
         
         Self {
-            chips: chips,
             sectors: [
                 Sector::new(Placement::A, Some(white)),
                 Sector::new(Placement::B, None),

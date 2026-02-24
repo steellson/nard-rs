@@ -2,14 +2,15 @@ use super::dice::Dice;
 
 const DICES: usize = 2;
 
+#[derive(Debug)]
 pub struct Throw {
-    dices: [u8; DICES],
-    is_jackpot: bool
+    pub dices: [Dice; DICES],
+    pub is_jackpot: bool
 }
 
 impl Throw {
     pub fn new() -> Self {
-        let dices = [Dice::roll(); DICES];
+        let dices = [Dice::new(), Dice::new()];
         let is_jackpot = dices[0].eq(&dices[1]);
         
         Self {

@@ -3,13 +3,14 @@ use super::deck::Deck;
 
 const PLAYERS: usize = 2;
 
+#[derive(Debug)]
 pub struct Game {
-    deck: Deck,
-    players: [Player; PLAYERS]
+    pub deck: Deck,
+    pub players: [Player; PLAYERS]
 }
 
 impl Game {
-    pub fn new() -> Self {       
+    pub fn new() -> Self { 
         Self {
             deck: Deck::new(),
             players: [

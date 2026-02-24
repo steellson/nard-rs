@@ -2,10 +2,15 @@ use rand;
 
 const MAX_VAL: u8 = 6;
 
-pub struct Dice {}
+#[derive(Debug, PartialEq)]
+pub struct Dice {
+    pub result: u8
+}
 
 impl Dice {
-    pub fn roll() -> u8 {
-        rand::random_range(1..=MAX_VAL)
+    pub fn new() -> Self {
+        Self {
+            result: rand::random_range(1..=MAX_VAL)
+        }
     }
 }

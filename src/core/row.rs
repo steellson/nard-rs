@@ -1,10 +1,10 @@
 use super::chip::Chip;
 use super::deck::SIDE_CHIPS;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Row {
-    num: u8,
-    chips: Option<[Chip; SIDE_CHIPS]>
+    pub num: u8,
+    pub chips: Option<[Chip; SIDE_CHIPS]>
 }
 
 impl Row {
