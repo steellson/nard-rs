@@ -1,4 +1,4 @@
-use std::io::stdin;
+use crate::tools::inputer::Inputer;
 
 #[derive(Debug, PartialEq)]
 pub enum Mode {
@@ -12,22 +12,13 @@ impl Mode {
         println!("Singleplayer - 1");
         println!("Multyplayer  - 2");
 
-        let mut input = String::new();
-        let mut mode: Option<Mode> = None;
-        while mode.is_none() {
-            input.clear();
-            stdin().read_line(&mut input).expect("Input error");
-            mode = match input.trim().parse::<u8>() {
-                Ok(1) => Some(Mode::Singleplayer),
-                Ok(2) => Some(Mode::Multiplayer),
-                _ => {
-                    println!("Unexpected input, try again");
-                    None
-                }
+        match Inputer::select_from_stdin(2) {
+            1 => Mode::Singleplayer,
+            2 => Mode::Multiplayer,
+            _ => {
+                println!("Mode selection warning!");
+                Mode::Singleplayer
             }
         }
-
-        input.clear();
-        return mode.unwrap();
     }
 }

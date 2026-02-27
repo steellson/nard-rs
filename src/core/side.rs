@@ -1,4 +1,4 @@
-use std::io::stdin;
+use crate::tools::inputer::Inputer;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Side {
@@ -11,22 +11,13 @@ impl Side {
         println!("White - 1");
         println!("Black - 2");
 
-        let mut input = String::new();
-        let mut side: Option<Side> = None;
-        while side.is_none() {
-            input.clear();
-            stdin().read_line(&mut input).expect("Input error");
-            side = match input.trim().parse::<u8>() {
-                Ok(1) => Some(Side::White),
-                Ok(2) => Some(Side::Black),
-                _ => {
-                    println!("Unexpected input, try again");
-                    None
-                }
+        match Inputer::select_from_stdin(2) {
+            1 => Side::White,
+            2 => Side::Black,
+            _ => {
+                println!("Side selection warning!");
+                Side::White
             }
         }
-
-        input.clear();
-        return side.unwrap();
     }
 }
