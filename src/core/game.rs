@@ -1,4 +1,4 @@
-use super::player::{Player, Side};
+use super::player::Player;
 use super::deck::Deck;
 
 const PLAYERS: usize = 2;
@@ -10,13 +10,10 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Self { 
+    pub fn new(players: [Player; PLAYERS]) -> Self { 
         Self {
             deck: Deck::new(),
-            players: [
-                Player::new(Side::White),
-                Player::new(Side::Black)
-            ]
+            players: players
         }
     }
 }

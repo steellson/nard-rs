@@ -1,4 +1,4 @@
-use super::player::Side;
+use super::side::Side;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Chip {

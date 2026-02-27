@@ -1,9 +1,5 @@
 use super::sector::Placement;
-
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub enum Side {
-    Black, White
-}
+use super::side::Side;
 
 #[derive(Debug)]
 pub struct Player {

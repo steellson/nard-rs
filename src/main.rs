@@ -1,19 +1,10 @@
 mod core;
+mod process;
+// mod tools;
 
-use crate::core::{game::Game, throw::Throw};
+use crate::process::controller::Controller;
 
 fn main() {
-    debug_log();
-}
-
-/* ----- DEBUG ----- */
-fn debug_log() {
-    let game = Game::new();
-    println!("Game initizlized!\n{:#?}\n", game);
-
-    let throw = Throw::new();
-    println!(
-        "Throw!\nDices: {:#?}, jackpot? - {:#?}\n",
-        throw.dices, throw.is_jackpot
-    );
+    let controller = Controller::new();
+    controller.start();
 }
