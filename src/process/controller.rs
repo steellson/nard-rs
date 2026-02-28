@@ -1,10 +1,14 @@
 use crate::core::{game::Game, mode::Mode, player::Player, side::Side, step::Step, throw::Throw};
+use crate::ui::menu::Menu;
 
-pub struct Controller {}
+#[derive(Debug)]
+pub struct Controller {
+    pub menu: Menu,
+}
 
 impl Controller {
     pub fn new() -> Self {
-        Self {}
+        Self { menu: Menu::new() }
     }
 
     pub fn start(self) {

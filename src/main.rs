@@ -1,10 +1,13 @@
 mod core;
 mod process;
 mod tools;
+mod ui;
 
-use crate::process::controller::Controller;
+use crate::process::{app::App, controller::Controller};
+use std::io;
 
-fn main() {
+fn main() -> io::Result<()> {
     let controller = Controller::new();
-    controller.start();
+    let mut app = App::new(controller);
+    ratatui::run(|terminal| app.run(terminal))
 }
