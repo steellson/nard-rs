@@ -1,63 +1,50 @@
-use crate::core::{game::Game, mode::Mode, player::Player, side::Side, step::Step, throw::Throw};
-use crate::ui::menu::Menu;
+use crate::ui::menu::{MenuSelector, MenuBorder};
+use crate::core::{game::Game, side::Side, mode::Mode};
 
 #[derive(Debug)]
 pub struct Controller {
-    pub menu: Menu,
+    // UI
+    pub menu_botder: MenuBorder,
+    pub menu: MenuSelector,
+    // Game
+    mode: Option<Mode>,
+    host_side: Option<Side>,
+    game: Option<Game>
 }
 
 impl Controller {
     pub fn new() -> Self {
-        Self { menu: Menu::new() }
-    }
-
-    pub fn start(self) {
-        // Prepare game
-        let game = self.prepare_game();
-        println!("Game started!\nFirst step: {:#?}\n", game.leading_side);
-
-        // First mock steps of first player
-        // One chip from head, one chip doesnt
-        let throw = Throw::new(false);
-        game.next_step(Step::new(&throw, true, false));
-        game.next_step(Step::new(&throw, false, false));
-
-        // Bye bye
-        println!("Exit!");
+        Self { 
+            menu_botder: MenuBorder::new(),
+            menu: MenuSelector::new(),
+            game: None,
+            host_side: None,
+            mode: None,
+        }
     }
 }
 
+// MARK: - Lifecycle
 impl Controller {
-    fn prepare_game(self) -> Game {
-        // Ask mode
-        let mode = Mode::new();
-        print!("Selected mode: {:?}\n", mode);
-
-        // Side selection
-        let host_side = Side::from_input();
-        let host_player = Player::new(host_side, true);
-        print!("Host select {:?} side\n", host_player);
-
-        let opposite_side = if host_side == Side::Black {
-            Side::White
-        } else {
-            Side::Black
-        };
-        let opposite_player = Player::new(opposite_side, false);
-        let players = [host_player, opposite_player];
-
-        // Initial throw
-        let throw = Throw::new(true);
-        println!("Throw!\nDices: {:?}\n", throw.dices);
-
-        // Building game
-        let is_host_leader = throw.dices[0].result > throw.dices[1].result;
-        let leading_side = if is_host_leader {
-            host_side
-        } else {
-            opposite_side
-        };
-
-        Game::new(players, leading_side)
+    pub fn start(mut self) {
+        // Selected mode (... should be taken from UI)
+        self.mode = Some(Mode::Singleplayer);
+        // Host select side (... should be taken from UI)
+        self.host_side = Some(Side::White);
+        // Init game
+        self.game = Some(Game::new(self.host_side.unwrap()));
+    }
+    
+    pub fn process(mut self) {
+        // Steps (from UI)
+        // ... Need eceive coordinates from users with UI model
+        self.game.unwrap().step();
+    }
+    
+    pub fn end(mut self) {
+        self.game = None;
+        self.mode = None;
+        self.host_side = None;
+        // ... Navigate go start menu screen
     }
 }

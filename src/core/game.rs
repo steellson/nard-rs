@@ -1,41 +1,60 @@
-use super::deck::Deck;
-use super::player::Player;
-use super::side::Side;
-use super::step::Step;
+use super::{
+    deck::Deck,
+    player::Player, 
+    side::Side,
+    throw::Throw
+};
 
 const PLAYERS: usize = 2;
 
 #[derive(Debug)]
 pub struct Game {
-    pub deck: Deck,
-    pub players: [Player; PLAYERS],
-    pub leading_side: Side,
+    step_of: Side,
+    deck: Deck,
+    last_throw: Throw,
+    players: [Player; PLAYERS]
 }
 
+// MARK: - Build game
 impl Game {
-    pub fn new(
-        players: [Player; PLAYERS], 
-        leading_side: Side
-    ) -> Self {
-        Self {
-            deck: Deck::new(),
-            players: players,
-            leading_side: leading_side,
-        }
-    }
-
-    pub fn next_step(&self, step: Step) {
-        let from_head = if step.is_from_head {
-            "from head"
-        } else {
-            "not from head"
+    pub fn new(host_side: Side) -> Self {
+        let opposite_side = match host_side {
+            Side::White => Side::Black,
+            Side::Black => Side::White
         };
         
-        println!(
-            "Step: {:?} / {:?} / {}",
-            step.throw.dices[0],
-            step.throw.dices[1], 
-            from_head
-        );
+        // Who step first ...
+        // Jackpot isn't available
+        let mut throw = Throw::new();
+        while throw.is_jackpot { throw = Throw::new(); }
+        
+        let dices = &throw.dices;
+        let is_host_leader = dices[0].result > dices[1].result;
+        let fist_step_of = match is_host_leader {
+            true => host_side,
+            false => opposite_side
+        };
+        
+        Self {
+            step_of: fist_step_of,
+            deck: Deck::new(),
+            last_throw: throw,
+            players: [
+                Player::new(host_side),
+                Player::new(opposite_side)
+            ],
+        }
+    }
+}
+
+// MARK: - Step
+impl Game {
+    pub fn step(&mut self) {
+        self.step_of = match self.step_of {
+            Side::White => Side::Black,
+            Side::Black => Side::White
+        };
+        let throw = Throw::new();
+        println!("Step");
     }
 }

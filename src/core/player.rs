@@ -5,11 +5,10 @@ use super::side::Side;
 pub struct Player {
     pub side: Side,
     pub final_sector: Placement,
-    pub is_host: bool
 }
 
 impl Player {
-    pub fn new(side: Side, is_host: bool) -> Self {
+    pub fn new(side: Side) -> Self {
         let final_sector = if side == Side::White {
             Placement::D
         } else {
@@ -19,7 +18,6 @@ impl Player {
         Self {
             side: side,
             final_sector: final_sector,
-            is_host: is_host
         }
     }
 }

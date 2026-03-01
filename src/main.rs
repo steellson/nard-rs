@@ -1,6 +1,5 @@
 mod core;
 mod process;
-mod tools;
 mod ui;
 
 use crate::process::{app::App, controller::Controller};

@@ -2,7 +2,6 @@ pub mod game;
 pub mod mode;
 pub mod player;
 pub mod side;
-pub mod step;
 pub mod throw;
 
 mod chip;

@@ -32,9 +32,14 @@ impl App {
 
     fn draw(&self, frame: &mut Frame) {
         frame.render_widget(
-            &self.controller.menu, 
+            &self.controller.menu_botder, 
             frame.area()
         );
+        // frame.render_stateful_widget(
+        //     &self.controller.menu,
+        //     frame.area(),
+        //     state
+        // );
     }
 
     fn handle_events(&mut self) -> io::Result<()> {

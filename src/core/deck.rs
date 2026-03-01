@@ -4,7 +4,7 @@ use super::chip::Chip;
 
 pub const SIDE_CHIPS: usize = 15;
 const ALL_CHIPS: usize = 30;
-const SECTORS: usize = 4;
+pub const SECTORS: usize = 4;
 
 #[derive(Debug)]
 pub struct Deck {
