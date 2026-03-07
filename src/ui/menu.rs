@@ -15,13 +15,18 @@ pub enum NavDirection {
 
 pub struct Menu {
     pub selected: &'static str,
+    header: &'static str,
     state: TableState,
     items: [&'static str; MAX_LENGTH],
 }
 
 impl Menu {
-    pub fn new(items: [&'static str; MAX_LENGTH]) -> Self {
+    pub fn new(
+        header: &'static str, 
+        items: [&'static str; MAX_LENGTH]
+    ) -> Self {
         Self {
+            header: header,
             selected: items[0],
             state: TableState::default().with_selected(0),
             items: items,
@@ -51,19 +56,11 @@ impl<'a> Menu {
         let header_style = Style::default()
             .fg(tailwind::BLACK)
             .bg(tailwind::WHITE);
-
-        let selected_row_style = Style::default()
-            .add_modifier(Modifier::REVERSED)
-            .fg(tailwind::WHITE);
-
-        let selected_col_style = Style::default()
-            .fg(tailwind::WHITE);
-
+        
         let selected_cell_style = Style::default()
-            .add_modifier(Modifier::REVERSED)
             .fg(tailwind::WHITE);
 
-        let header = ["Game mode"]
+        let header = [self.header]
             .into_iter()
             .map(Cell::from)
             .collect::<Row>()
@@ -74,8 +71,14 @@ impl<'a> Menu {
             .items
             .iter()
             .map(|content| {
-                Row::new(vec![Cell::from(Text::from(format!("\n{content}\n")))])
-                    .style(Style::new().fg(tailwind::WHITE).bg(tailwind::BLACK))
+                let text = Text::from(format!("\n{content}\n"))
+                    .green()
+                    .centered();
+                let style = Style::new()
+                    .fg(tailwind::WHITE)
+                    .bg(tailwind::BLACK);
+                Row::new(vec![Cell::from(text)])
+                    .style(style)
                     .height(4)
             })
             .collect();
@@ -83,13 +86,11 @@ impl<'a> Menu {
         let bar = " █ ";
         let t = Table::new(rows, [Constraint::Min(30)])
             .header(header)
-            .row_highlight_style(selected_row_style)
-            .column_highlight_style(selected_col_style)
             .cell_highlight_style(selected_cell_style)
             .highlight_symbol(Text::from(vec![
                 "".into(),
-                bar.into(),
-                bar.into(),
+                bar.green().into(),
+                bar.green().into(),
                 "".into(),
             ]))
             .bg(tailwind::BLACK)

@@ -28,7 +28,7 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {        
         Self { 
-            menu: Menu::new(MODES),
+            menu: Menu::new("Game mode", MODES),
             field: Field::new(),
             scene: Scenes::SelectMode,
             game: None,
@@ -83,20 +83,18 @@ impl Controller {
                             "Multiplayer" => Some(Mode::Multiplayer),
                             _ => Some(Mode::Singleplayer)
                         };
-                        self.menu = Menu::new(SIDES);
+                        self.scene = Scenes::SelectSide;
+                        self.menu = Menu::new("Side selection", SIDES);
                     },
                     Scenes::SelectSide => {
                         self.host_side = match self.menu.selected {
                             "Black" => Some(Side::Black),
                             _ => Some(Side::White)
                         };
+                        self.scene = Scenes::GameDeck;
                         self.game = Some(Game::new(self.host_side.unwrap()));
                     },
-                    Scenes::GameDeck => {
-                        // ...
-                        // ...
-                        // ...
-                    }
+                    _ => {}
                 }
             }
             _ => {}
@@ -107,30 +105,5 @@ impl Controller {
         // ...
         // ...
         // ...
-    }
-}
-
-// MARK: - Lifecycle
-impl Controller {
-    fn start(mut self) {
-        // Selected mode (... should be taken from UI)
-        self.mode = Some(Mode::Singleplayer);
-        // Host select side (... should be taken from UI)
-        self.host_side = Some(Side::White);
-        // Init game
-        self.game = Some(Game::new(self.host_side.unwrap()));
-    }
-       
-    fn process(self) {
-        // Steps (from UI)
-        // ... Need eceive coordinates from users with UI model
-        self.game.unwrap().step();
-    }
-    
-    fn end(mut self) {
-        self.game = None;
-        self.mode = None;
-        self.host_side = None;
-        // ... Navigate go start menu screen
     }
 }
