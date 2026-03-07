@@ -4,12 +4,11 @@ use super::row::Row;
 
 const ROWS_IN_SECTOR: usize = 6;
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub enum Placement {
     A, B, C, D
 }
 
-#[derive(Debug)]
 pub struct Sector {
     pub placement: Placement,
     pub rows: [Row; ROWS_IN_SECTOR]

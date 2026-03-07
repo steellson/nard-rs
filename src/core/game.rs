@@ -7,7 +7,6 @@ use super::{
 
 const PLAYERS: usize = 2;
 
-#[derive(Debug)]
 pub struct Game {
     step_of: Side,
     deck: Deck,

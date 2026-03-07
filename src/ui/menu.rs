@@ -1,86 +1,100 @@
 use ratatui::{
-    buffer::Buffer,
-    layout::{Constraint, Rect},
-    style::{Style,Stylize},
-    symbols::border,
-    text::{Line, Text},
-    widgets::{Block, Paragraph, StatefulWidget, Table, Widget, Row, TableState},
+    Frame,
+    text::Text,
+    layout::Constraint,
+    style::{Modifier, Style, Stylize, palette::tailwind},
+    widgets::{Cell, HighlightSpacing, Row, Table, TableState},
 };
 
-// MARK: - Border
-#[derive(Debug)]
-pub struct MenuBorder {}
+const MAX_LENGTH: usize = 2;
 
-impl MenuBorder {
-    pub fn new() -> Self {
-        Self {}
+pub enum NavDirection {
+    Up,
+    Down,
+}
+
+pub struct Menu {
+    pub selected: &'static str,
+    state: TableState,
+    items: [&'static str; MAX_LENGTH],
+}
+
+impl Menu {
+    pub fn new(items: [&'static str; MAX_LENGTH]) -> Self {
+        Self {
+            selected: items[0],
+            state: TableState::default().with_selected(0),
+            items: items,
+        }
+    }
+
+    pub fn select_row(&mut self, direction: NavDirection) {
+        let item = match self.state.selected() {
+            Some(i) => match direction {
+                NavDirection::Up => {
+                    if i >= self.items.len() - 1 { 0 } else { i + 1 }
+                }
+                NavDirection::Down => {
+                    if i == 0 { self.items.len() - 1 } else { i - 1 }
+                }
+            },
+            None => 0,
+        };
+        self.selected = self.items[item];
+        self.state.select(Some(item));
     }
 }
 
-// MARK: - Render border
-impl Widget for &MenuBorder {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from(" NARD-rS ".green().bold());
+// MARK: - Render
+impl<'a> Menu {
+    pub fn render(&mut self, frame: &'a mut Frame) {
+        let header_style = Style::default()
+            .fg(tailwind::BLACK)
+            .bg(tailwind::WHITE);
 
-        let instructions = Line::from(vec![
-            " Select ".into(),
-            "⬆️ or ⬇️".bold(),
-            " ---------- ".bold(),
-            " Quit ".into(),
-            "[Q] ".green().bold(),
-        ]);
+        let selected_row_style = Style::default()
+            .add_modifier(Modifier::REVERSED)
+            .fg(tailwind::WHITE);
 
-        let border = Block::bordered()
-            .title(title.centered())
-            .title_bottom(instructions.centered())
-            .border_set(border::ROUNDED);
+        let selected_col_style = Style::default()
+            .fg(tailwind::WHITE);
 
-        let text = Text::from(
-            vec![
-                Line::from(vec![1337.to_string().yellow()])
-            ]
-        );
+        let selected_cell_style = Style::default()
+            .add_modifier(Modifier::REVERSED)
+            .fg(tailwind::WHITE);
 
-        Paragraph::new(text)
-            .centered()
-            .block(border)
-            .render(area, buf);
-    }
-}
+        let header = ["Game mode"]
+            .into_iter()
+            .map(Cell::from)
+            .collect::<Row>()
+            .style(header_style)
+            .height(1);
 
-// MARK: - Selector
-#[derive(Debug)]
-pub struct MenuSelector {}
+        let rows: Vec<Row> = self
+            .items
+            .iter()
+            .map(|content| {
+                Row::new(vec![Cell::from(Text::from(format!("\n{content}\n")))])
+                    .style(Style::new().fg(tailwind::WHITE).bg(tailwind::BLACK))
+                    .height(4)
+            })
+            .collect();
 
-impl MenuSelector {
-    pub fn new() -> Self { Self {} } 
-}
+        let bar = " █ ";
+        let t = Table::new(rows, [Constraint::Min(30)])
+            .header(header)
+            .row_highlight_style(selected_row_style)
+            .column_highlight_style(selected_col_style)
+            .cell_highlight_style(selected_cell_style)
+            .highlight_symbol(Text::from(vec![
+                "".into(),
+                bar.into(),
+                bar.into(),
+                "".into(),
+            ]))
+            .bg(tailwind::BLACK)
+            .highlight_spacing(HighlightSpacing::Always);
 
-// MARK: - Render selector
-impl StatefulWidget for &MenuSelector {
-    type State = TableState;
-    
-    fn render(
-        self,
-        area: Rect,
-        buf: &mut Buffer, 
-        state: &mut TableState
-    ) {        
-        let rows = [
-            Row::new(vec!["Row11"]),
-            Row::new(vec!["Row21"]),
-            Row::new(vec!["Row31"]),
-        ];
-        let widths = [
-            Constraint::Length(50),
-            Constraint::Length(50),
-            Constraint::Length(10),
-        ];
-        
-        Table::new(rows, widths)
-            .block(Block::new().title("Table"))
-            .row_highlight_style(Style::new().reversed())
-            .highlight_symbol(">>");
-            // .render(area, buf, state);
+        frame.render_stateful_widget(t, frame.area(), &mut self.state);
     }
 }

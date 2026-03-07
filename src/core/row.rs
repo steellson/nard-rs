@@ -1,7 +1,7 @@
 use super::chip::Chip;
 use super::deck::SIDE_CHIPS;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 pub struct Row {
     pub num: u8,
     pub chips: Option<[Chip; SIDE_CHIPS]>

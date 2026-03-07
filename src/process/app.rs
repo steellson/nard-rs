@@ -1,10 +1,9 @@
 use std::io;
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::{DefaultTerminal, Frame};
 
 use super::controller::Controller;
 
-#[derive(Debug)]
 pub struct App {
     controller: Controller,
     exit: bool,
@@ -30,32 +29,22 @@ impl App {
         Ok(())
     }
 
-    fn draw(&self, frame: &mut Frame) {
-        frame.render_widget(
-            &self.controller.menu_botder, 
-            frame.area()
-        );
-        // frame.render_stateful_widget(
-        //     &self.controller.menu,
-        //     frame.area(),
-        //     state
-        // );
+    fn draw(&mut self, frame: &mut Frame) {
+        self.controller.render(frame);
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event)
-            }
+                // Handling exit
+                if key_event.code == KeyCode::Char('q') {
+                    self.exit = true
+                }
+                // Handling other actions from controller
+                self.controller.handle_key(key_event);
+            },
             _ => {}
         };
         Ok(())
-    }
-
-    fn handle_key_event(&mut self, key_event: KeyEvent) {
-        match key_event.code {
-            KeyCode::Char('q') => { self.exit = true },
-            _ => {}
-        }
     }
 }

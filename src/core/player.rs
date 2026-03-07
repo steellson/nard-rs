@@ -1,7 +1,6 @@
 use super::sector::Placement;
 use super::side::Side;
 
-#[derive(Debug)]
 pub struct Player {
     pub side: Side,
     pub final_sector: Placement,

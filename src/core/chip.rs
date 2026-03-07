@@ -1,8 +1,8 @@
 use super::side::Side;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Chip {
-    pub side: Side
+    pub side: Side,
 }
 
 impl Chip {

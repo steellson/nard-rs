@@ -6,7 +6,6 @@ pub const SIDE_CHIPS: usize = 15;
 const ALL_CHIPS: usize = 30;
 pub const SECTORS: usize = 4;
 
-#[derive(Debug)]
 pub struct Deck {
     pub sectors: [Sector; SECTORS]
 }
