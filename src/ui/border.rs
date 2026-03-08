@@ -2,8 +2,8 @@ use ratatui::{
     Frame,
     text::Line,
     widgets::Block,
-    style::Stylize,
-    symbols::border
+    style::{palette::tailwind, Stylize},
+    symbols::border,
 };
 
 pub enum BorderStyle {
@@ -19,7 +19,7 @@ impl<'a> Border {
 
         let instructions = match style {
             BorderStyle::Menu => Line::from(vec![
-                " Select ".into(),
+                " Navigation ".into(),
                 "⬆️ or ⬇️".bold(),
                 " ---------- ".bold(),
                 " Quit ".into(),
@@ -34,6 +34,7 @@ impl<'a> Border {
         let border = Block::bordered()
             .title(title.centered())
             .title_bottom(instructions.centered())
+            .bg(tailwind::BLACK)
             .border_set(border::ROUNDED);
 
         frame.render_widget(border, frame.area());

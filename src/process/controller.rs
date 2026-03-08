@@ -28,7 +28,7 @@ pub struct Controller {
 impl Controller {
     pub fn new() -> Self {        
         Self { 
-            menu: Menu::new("Game mode", MODES),
+            menu: Menu::new("SELECT GAME MODE:", MODES),
             field: Field::new(),
             scene: Scenes::SelectMode,
             game: None,
@@ -84,7 +84,7 @@ impl Controller {
                             _ => Some(Mode::Singleplayer)
                         };
                         self.scene = Scenes::SelectSide;
-                        self.menu = Menu::new("Side selection", SIDES);
+                        self.menu = Menu::new("SELECT YOUR SIDE:", SIDES);
                     },
                     Scenes::SelectSide => {
                         self.host_side = match self.menu.selected {

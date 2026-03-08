@@ -1,9 +1,9 @@
 use ratatui::{
-    Frame,
-    text::Text,
-    layout::Constraint,
-    style::{Modifier, Style, Stylize, palette::tailwind},
-    widgets::{Cell, HighlightSpacing, Row, Table, TableState},
+    Frame, 
+    text::Text, 
+    style::{Style, Stylize, palette::tailwind}, 
+    layout::{Constraint, HorizontalAlignment}, 
+    widgets::{Cell, Row, Table, TableState}
 };
 
 const MAX_LENGTH: usize = 2;
@@ -53,49 +53,67 @@ impl Menu {
 // MARK: - Render
 impl<'a> Menu {
     pub fn render(&mut self, frame: &'a mut Frame) {
+        frame.render_stateful_widget(
+            self.table(), 
+            frame.area().centered(
+                Constraint::Percentage(20),
+                Constraint::Percentage(30),
+            ),
+            &mut self.state
+        );
+    }
+    
+    fn header(&self) -> Row<'a> {
         let header_style = Style::default()
-            .fg(tailwind::BLACK)
-            .bg(tailwind::WHITE);
-        
-        let selected_cell_style = Style::default()
-            .fg(tailwind::WHITE);
+            .bold()
+            .black()
+            .italic()
+            .fg(tailwind::BLACK);
 
-        let header = [self.header]
+        [self.header.light_green()]
             .into_iter()
             .map(Cell::from)
             .collect::<Row>()
             .style(header_style)
-            .height(1);
-
-        let rows: Vec<Row> = self
+            .height(1)
+    }
+    
+    fn rows(&mut self) -> Vec<Row<'a>> {
+        self
             .items
             .iter()
             .map(|content| {
-                let text = Text::from(format!("\n{content}\n"))
+                let text = Text::from(format!("\n{content}"))
                     .green()
-                    .centered();
+                    .centered()
+                    .alignment(HorizontalAlignment::Left);
+                
                 let style = Style::new()
-                    .fg(tailwind::WHITE)
                     .bg(tailwind::BLACK);
+                
                 Row::new(vec![Cell::from(text)])
                     .style(style)
-                    .height(4)
+                    .height(2)
             })
-            .collect();
-
-        let bar = " █ ";
-        let t = Table::new(rows, [Constraint::Min(30)])
-            .header(header)
-            .cell_highlight_style(selected_cell_style)
-            .highlight_symbol(Text::from(vec![
-                "".into(),
-                bar.green().into(),
-                bar.green().into(),
-                "".into(),
-            ]))
+            .collect()
+    }
+    
+    fn table(&mut self) -> Table<'a> {
+        let highlited_style = Style::default()
+            .fg(tailwind::WHITE)
+            .rapid_blink();
+        
+        let highlited_symbol = Text::from(vec![ 
+            "".into(),
+            " █ ".into(),
+            " █ ".into(),
+            "".into(),
+        ]);
+        
+        Table::new(self.rows(), [Constraint::Percentage(100)])
+            .header(self.header())
+            .row_highlight_style(highlited_style)
+            .highlight_symbol(highlited_symbol)
             .bg(tailwind::BLACK)
-            .highlight_spacing(HighlightSpacing::Always);
-
-        frame.render_stateful_widget(t, frame.area(), &mut self.state);
     }
 }
