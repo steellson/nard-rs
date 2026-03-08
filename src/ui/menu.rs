@@ -1,8 +1,8 @@
 use ratatui::{
-    Frame, 
-    text::Text, 
-    style::{Style, Stylize, palette::tailwind}, 
-    layout::{Constraint, HorizontalAlignment}, 
+    Frame,
+    text::Text,
+    style::{Style, Stylize, palette::tailwind},
+    layout::{Constraint, HorizontalAlignment},
     widgets::{Cell, Row, Table, TableState}
 };
 
@@ -53,29 +53,26 @@ impl Menu {
 // MARK: - Render
 impl<'a> Menu {
     pub fn render(&mut self, frame: &'a mut Frame) {
+        let area = frame.area();
+        
+        // Header
+        frame.render_widget(
+            Text::from(self.header.green().bold().italic()),
+            area.centered(
+                Constraint::Percentage(20),
+                Constraint::Percentage(40),
+            )
+        );
+        
+        // Table
         frame.render_stateful_widget(
             self.table(), 
-            frame.area().centered(
+            area.centered(
                 Constraint::Percentage(20),
                 Constraint::Percentage(30),
             ),
             &mut self.state
         );
-    }
-    
-    fn header(&self) -> Row<'a> {
-        let header_style = Style::default()
-            .bold()
-            .black()
-            .italic()
-            .fg(tailwind::BLACK);
-
-        [self.header.light_green()]
-            .into_iter()
-            .map(Cell::from)
-            .collect::<Row>()
-            .style(header_style)
-            .height(1)
     }
     
     fn rows(&mut self) -> Vec<Row<'a>> {
@@ -111,7 +108,6 @@ impl<'a> Menu {
         ]);
         
         Table::new(self.rows(), [Constraint::Percentage(100)])
-            .header(self.header())
             .row_highlight_style(highlited_style)
             .highlight_symbol(highlited_symbol)
             .bg(tailwind::BLACK)
