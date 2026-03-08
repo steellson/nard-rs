@@ -59,7 +59,7 @@ impl<'a> Menu {
         frame.render_widget(
             Text::from(self.header.green().bold().italic()),
             area.centered(
-                Constraint::Percentage(10),
+                Constraint::Max(18),
                 Constraint::Percentage(40),
             )
         );
@@ -68,7 +68,7 @@ impl<'a> Menu {
         frame.render_stateful_widget(
             self.table(), 
             area.centered(
-                Constraint::Percentage(10),
+                Constraint::Max(18),
                 Constraint::Percentage(30),
             ),
             &mut self.state
