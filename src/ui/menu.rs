@@ -1,5 +1,9 @@
 use ratatui::{
-    Frame, layout::{Constraint, HorizontalAlignment, Rect}, style::{Style, Stylize, palette::tailwind}, text::Text, widgets::{Cell, Row, Table, TableState}
+    Frame,
+    text::Text, 
+    layout::{Constraint, HorizontalAlignment},
+    style::{Style, Stylize, palette::tailwind}, 
+    widgets::{Cell, Row, Table, TableState}
 };
 
 const MAX_LENGTH: usize = 2;

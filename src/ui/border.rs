@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 pub enum BorderStyle {
-    Menu, Game
+    Menu, Game, Error
 }
 
 pub struct Border {}
@@ -26,6 +26,12 @@ impl<'a> Border {
                 "[Q] ".green().bold(),
             ]),
             BorderStyle::Game => Line::from(vec![
+                " Quit ".into(),
+                // ...
+                // ...
+                "[Q] ".green().bold(),
+            ]),
+            BorderStyle::Error => Line::from(vec![
                 " Quit ".into(),
                 "[Q] ".green().bold(),
             ])

@@ -1,12 +1,17 @@
 use ratatui::Frame;
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::ui::border::{self, Border};
-use crate::ui::menu::{Menu, NavDirection};
-use crate::ui::field::Field;
-use crate::core::game::Game;
-use crate::core::mode::{Mode, MODES};
-use crate::core::side::{Side, SIDES};
+use crate::ui::{
+    popup::Popup,
+    field::Field,
+    menu::{Menu, NavDirection},
+    border::{Border, BorderStyle}
+};
+use crate::core::{
+    game::Game,
+    mode::{Mode, MODES},
+    side::{Side, SIDES}
+};
 
 enum Scenes {
     SelectMode,
@@ -39,17 +44,22 @@ impl Controller {
 // MARK: - Render
 impl Controller {
     pub fn render(&mut self, frame: &mut Frame) {
+        if frame.area().height < 15 || frame.area().width < 60 {    
+            Popup::render("Make me larger, pls!", frame);
+            return
+        }
+        
         match self.scene {
             Scenes::SelectMode => {
-                Border::render(frame, border::BorderStyle::Menu);
+                Border::render(frame, BorderStyle::Menu);
                 self.menu.render(frame)
             },
             Scenes::SelectSide => {
-                Border::render(frame, border::BorderStyle::Menu);
+                Border::render(frame, BorderStyle::Menu);
                 self.menu.render(frame)
             },
             Scenes::GameDeck => {
-                Border::render(frame, border::BorderStyle::Game);
+                Border::render(frame, BorderStyle::Game);
                 match &mut self.game {
                     Some(g) => Field::new().render(frame, &g.deck),
                     None => {}
