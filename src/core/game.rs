@@ -8,8 +8,8 @@ use super::{
 const PLAYERS: usize = 2;
 
 pub struct Game {
+    pub deck: Deck,
     step_of: Side,
-    deck: Deck,
     last_throw: Throw,
     players: [Player; PLAYERS]
 }

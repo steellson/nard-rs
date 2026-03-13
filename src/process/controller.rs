@@ -17,7 +17,6 @@ enum Scenes {
 pub struct Controller {
     // UI
     menu: Menu,
-    field: Field,
     scene: Scenes,
     // Game
     mode: Option<Mode>,
@@ -29,7 +28,6 @@ impl Controller {
     pub fn new() -> Self {        
         Self { 
             menu: Menu::new("SELECT GAME MODE:", MODES),
-            field: Field::new(),
             scene: Scenes::SelectMode,
             game: None,
             host_side: None,
@@ -52,7 +50,10 @@ impl Controller {
             },
             Scenes::GameDeck => {
                 Border::render(frame, border::BorderStyle::Game);
-                self.field.render(frame);
+                match &mut self.game {
+                    Some(g) => Field::new().render(frame, &g.deck),
+                    None => {}
+                }
             }
         }
     }
@@ -91,8 +92,8 @@ impl Controller {
                             "Black" => Some(Side::Black),
                             _ => Some(Side::White)
                         };
-                        self.scene = Scenes::GameDeck;
                         self.game = Some(Game::new(self.host_side.unwrap()));
+                        self.scene = Scenes::GameDeck;
                     },
                     _ => {}
                 }
