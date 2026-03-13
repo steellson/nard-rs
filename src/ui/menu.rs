@@ -1,9 +1,5 @@
 use ratatui::{
-    Frame,
-    text::Text,
-    style::{Style, Stylize, palette::tailwind},
-    layout::{Constraint, HorizontalAlignment},
-    widgets::{Cell, Row, Table, TableState}
+    Frame, layout::{Constraint, HorizontalAlignment, Rect}, style::{Style, Stylize, palette::tailwind}, text::Text, widgets::{Cell, Row, Table, TableState}
 };
 
 const MAX_LENGTH: usize = 2;
@@ -60,7 +56,7 @@ impl<'a> Menu {
             Text::from(self.header.green().bold().italic()),
             area.centered(
                 Constraint::Max(18),
-                Constraint::Percentage(40),
+                Constraint::Ratio(1, 2)
             )
         );
         
@@ -69,7 +65,7 @@ impl<'a> Menu {
             self.table(), 
             area.centered(
                 Constraint::Max(18),
-                Constraint::Percentage(30),
+                Constraint::Ratio(1, 2)
             ),
             &mut self.state
         );
@@ -108,6 +104,7 @@ impl<'a> Menu {
         ]);
         
         Table::new(self.rows(), [Constraint::Percentage(100)])
+            .header(Row::new(Text::from("")))
             .row_highlight_style(highlited_style)
             .highlight_symbol(highlited_symbol)
             .bg(tailwind::BLACK)
