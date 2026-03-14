@@ -10,11 +10,15 @@ use crate::ui::border::{Border, BorderStyle};
 pub struct Popup {}
 
 impl Popup {
-    pub fn render(msg: &str, frame: &mut Frame) {
+    pub fn render(
+        msg: String,
+        border: BorderStyle, 
+        frame: &mut Frame
+    ) {
         let area = frame.area();
         
         // Game border
-        Border::render(frame, BorderStyle::Error);
+        Border::render(frame, border);
         
         // Popup border
         let popup_rect = Rect::new(

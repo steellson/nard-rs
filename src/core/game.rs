@@ -9,8 +9,8 @@ const PLAYERS: usize = 2;
 
 pub struct Game {
     pub deck: Deck,
-    step_of: Side,
-    last_throw: Throw,
+    pub step_of: Side,
+    pub last_throw: Throw,
     players: [Player; PLAYERS]
 }
 

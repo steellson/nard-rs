@@ -1,5 +1,7 @@
 use ratatui::{
-    Frame, layout::{Constraint, Flex, HorizontalAlignment, Layout, Offset, Rect}, symbols::line, text::Text
+    Frame, 
+    text::Text,
+    layout::{Constraint, Flex, Layout, Offset, Rect},
 };
 
 use crate::core::{
@@ -29,6 +31,7 @@ impl Field {
 impl<'a> Field {
     pub fn render(
         &mut self, frame: &'a mut Frame,
+        step_of: &Side,
         deck: &Deck
     ) {
         let area = frame.area();
@@ -102,27 +105,23 @@ impl<'a> Field {
     fn draw_line(&self, row: &Row, right_aligned: bool) -> Text<'a> {
         let mut line = self.line(row);
         
-        match row.chips {
-            Some(chips) => {   
-                let chip = if chips[0].side == Side::White { 
-                    "⚪️"
-                } else { 
-                    "⚫️"
-                };
-             
-                for index in 0..=SIDE_CHIPS - 1 {
-                    if index <= SIDE_CHIPS - 1 {
-                        line[index] = chip
-                    }
+        if let Some(chips) = row.chips {
+            let chip = if chips[0].side == Side::White { 
+                "⚪️"
+            } else { 
+                "⚫️"
+            };
+         
+            for index in 0..=SIDE_CHIPS - 1 {
+                if index <= SIDE_CHIPS - 1 {
+                    line[index] = chip
                 }
-            },
-            None => {}
+            }
         }
-        
+         
         if right_aligned {
             line.reverse();
-            Text::from(format!("{}{}", line.join(""), self.border))
-                .alignment(HorizontalAlignment::Right)
+            Text::from(format!("{}{}", line.join(""), self.border)).right_aligned()
         } else {
             Text::from(format!("{}{}", self.border, line.join("")))
         }
@@ -131,21 +130,13 @@ impl<'a> Field {
     fn line(&self, row: &Row) -> [&str; SIDE_CHIPS] {
         let mut content = [self.empty_char; SIDE_CHIPS];
         
-        match row.chips {
-            Some(chips) => {                
-                for index in 0..=SIDE_CHIPS - 1 {
-                    if index <= SIDE_CHIPS - 1 {
-                        content[index] = if chips[0].side == Side::White {
-                            "⚪️"
-                        } else {
-                            "⚫️"
-                        };
-                    }
-                }
-                content
-                
-            },
-            None => { content }
+        if let Some(chips) = row.chips {
+            for i in 0..SIDE_CHIPS {
+                let is_white = chips[i].side == Side::White;
+                content[i] = if is_white { "⚪" } else { "⚫" };
+            }
         }
+        
+        content
     }
 }

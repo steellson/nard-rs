@@ -7,7 +7,11 @@ use ratatui::{
 };
 
 pub enum BorderStyle {
-    Menu, Game, Error
+    Menu,
+    Game, 
+    Step,
+    Throw,
+    Error
 }
 
 pub struct Border {}
@@ -26,9 +30,27 @@ impl<'a> Border {
                 "[Q] ".green().bold(),
             ]),
             BorderStyle::Game => Line::from(vec![
+                " Navigation ".into(),
+                "⬆️ or ⬇️".bold(),
+                " -------- ".bold(),
+                " Apply step ".into(),
+                "[Enter]".green().bold(),
+                " -------- ".bold(),
                 " Quit ".into(),
-                // ...
-                // ...
+                "[Q] ".green().bold(),
+            ]),
+            BorderStyle::Step => Line::from(vec![
+                " Throw! ".into(),
+                "[Space]".green().bold(),
+                " ---------- ".bold(),
+                " Quit ".into(),
+                "[Q] ".green().bold(),
+            ]),
+            BorderStyle::Throw => Line::from(vec![
+                " Continue ".into(),
+                "[Enter]".green().bold(),
+                " ---------- ".bold(),
+                " Quit ".into(),
                 "[Q] ".green().bold(),
             ]),
             BorderStyle::Error => Line::from(vec![
