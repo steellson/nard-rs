@@ -1,9 +1,11 @@
-use ratatui::Frame;
-use ratatui::widgets::Block;
-use ratatui::style::{Style, Stylize, palette::tailwind};
+use ratatui::{
+    Frame,
+    layout::Rect,
+    style::{Style, Stylize, palette::tailwind},
+    widgets::{Block, BorderType, Paragraph, Wrap}
+};
 
 use crate::ui::border::{Border, BorderStyle};
-
 
 pub struct Popup {}
 
@@ -15,7 +17,7 @@ impl Popup {
         Border::render(frame, BorderStyle::Error);
         
         // Popup border
-        let popup_rect = ratatui::layout::Rect::new(
+        let popup_rect = Rect::new(
             area.width / 4, 
             1,
             area.width / 2,
@@ -24,22 +26,22 @@ impl Popup {
         let popup_border_style = Style::default()
             .bg(tailwind::BLACK);
         let popup_border = Block::bordered()
-            .border_type(ratatui::widgets::BorderType::Rounded)
+            .border_type(BorderType::Rounded)
             .style(popup_border_style);
         
         frame.render_widget(popup_border, popup_rect);
         
         // Text 
-        let text_rect = ratatui::layout::Rect::new(
+        let text_rect = Rect::new(
             popup_rect.width / 2 + 1, 
             popup_rect.height / 2 + 1,
             popup_rect.width - 2,
             popup_rect.height - 2
         );
-        let error_text = ratatui::widgets::Paragraph::new(msg.green())
+        let text = Paragraph::new(msg.green())
             .centered()
-            .wrap(ratatui::widgets::Wrap { trim: true });
+            .wrap(Wrap { trim: true });
         
-        frame.render_widget(error_text, text_rect);
+        frame.render_widget(text, text_rect);
     }
 }

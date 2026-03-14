@@ -44,7 +44,7 @@ impl Controller {
 // MARK: - Render
 impl Controller {
     pub fn render(&mut self, frame: &mut Frame) {
-        if frame.area().height < 15 || frame.area().width < 60 {    
+        if frame.area().height < 15 || frame.area().width < 70 {    
             Popup::render("Make me larger, pls!", frame);
             return
         }
