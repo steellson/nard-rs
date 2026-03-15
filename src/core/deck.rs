@@ -1,11 +1,12 @@
 use super::sector::{Sector, Placement};
-use super::side::Side;
+use super::sides::Side;
 use super::chip::Chip;
 
 pub const SIDE_CHIPS: usize = 15;
 const ALL_CHIPS: usize = 30;
 pub const SECTORS: usize = 4;
 
+#[derive(Clone, Copy)]
 pub struct Deck {
     pub sectors: [Sector; SECTORS]
 }

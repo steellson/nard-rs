@@ -1,112 +1,147 @@
 use ratatui::Frame;
 use crossterm::event::{KeyCode, KeyEvent};
+use super::state::State;
 
-use crate::ui::{
-    field::Field, 
+use crate::{core::throw::Throw, ui::{
+    menu::Menu, 
     popup::Popup,
-    menu::{Menu, NavDirection},
-    border::{Border, BorderStyle},
-};
+    field::Field,
+    border::{Border, BorderStyle}
+}};
 use crate::core::{
     game::Game,
-    mode::{Mode, MODES},
-    side::{Side, SIDES}
+    modes::Modes,
+    sides::Sides
 };
 
-enum Scenes {
-    GameMenu,
-    GameDeck
-}
-
 pub struct Controller {
-    // UI
-    menu: Menu,
-    scene: Scenes,
-    // Game
-    mode: Option<Mode>,
-    host_side: Option<Side>,
-    game: Option<Game>,
-    step_info_showed: bool,
-    throw_info_showed: bool
+    modes: Modes,
+    sides: Sides,
+    state: State,
+    game: Option<Game>
 }
 
 impl Controller {
     pub fn new() -> Self {        
         Self { 
-            menu: Menu::new("SELECT GAME MODE:", MODES),
-            scene: Scenes::GameMenu,
-            mode: None,
-            host_side: None,
-            game: None,
-            step_info_showed: false,
-            throw_info_showed: false
+            modes: Modes::new(),
+            sides: Sides::new(),
+            state: State::new(),
+            game: None
         }
     }
 }
 
 // MARK: - Render
 impl Controller {
-    pub fn render(&mut self, frame: &mut Frame) {
+    pub fn render(&self, frame: &mut Frame) {        
+        // Prevent small screen size
         if frame.area().height < 15 || frame.area().width < 70 {  
           let resize_str = String::from("Make me larger, pls!");  
           Popup::render(resize_str, BorderStyle::Error, frame);
           return
         }
-        
-        match self.scene {
-            Scenes::GameMenu => {
-                Border::render(frame, BorderStyle::Menu);
-                self.menu.render(frame)
-            },
-            Scenes::GameDeck => {                
-                if let Some(g) = &mut self.game {
-                    if self.step_info_showed {
-                        // Step info
-                        let is_white = g.step_of == Side::White;
-                        let side_str = if is_white { SIDES[0] } else { SIDES[1] };
-                        let step_srt = format!("Current step: {side_str}");
-                        Popup::render(step_srt, BorderStyle::Step, frame);
-                    } else if self.throw_info_showed {
-                        // Throw info
-                        let dice_1 = g.last_throw.dices[0].result;
-                        let dice_2 = g.last_throw.dices[1].result;
-                        let jackpot_res = if g.last_throw.is_jackpot { "Jackpot!" } else { "" };
-                        let throw_str = format!("Throwed!\n Result: {dice_1} {dice_2} \n{jackpot_res}");
-                        Popup::render(throw_str, BorderStyle::Throw, frame);
-                    } else {
-                        // Game field 
-                        Border::render(frame, BorderStyle::Game);
-                        Field::new().render(frame, &g.step_of, &g.deck);
-                    }
-                }
-            }
+        // Select mode
+        if !self.state.mode_selected {
+            self.render_mode_menu(frame);
+            return
         }
+        // Select host side
+        if !self.state.side_selected {
+            self.render_side_menu(frame);
+            return
+        }
+        // Game process
+        if let Some(g) = &self.game {
+            // Step info
+            if self.state.step_info_showed {
+                self.render_step_info(frame);
+                return
+            } 
+            // Throw info
+            if self.state.throw_info_showed {
+                self.render_throw_info(frame, &g.last_throw);
+                return
+            }
+            // Game field 
+            let field = Field::new(g.deck);
+            field.render(frame);
+            Border::render(frame, BorderStyle::Game);
+        }
+    }
+    
+    fn render_mode_menu(&self, frame: &mut Frame) {
+        let values = self.modes.source.map(|m| 
+            String::from(m.raw_value())
+        ).to_vec();
+        let selected = self.modes.selected;
+        let menu = Menu::new("SELECT GAME MODE:", selected, values);
+        menu.render(frame);
+        Border::render(frame, BorderStyle::Menu);
+    }
+    
+    fn render_side_menu(&self, frame: &mut Frame) {
+        let values = self.sides.source.map(|m|
+            format!("{} chips", String::from(m.raw_value()))
+        ).to_vec();
+        let selected = self.sides.selected;
+        let menu = Menu::new("SELECT YOUR SIDE:", selected, values);
+        menu.render(frame);
+        Border::render(frame, BorderStyle::Menu);
+    }
+    
+    fn render_step_info(&self, frame: &mut Frame) {
+        let side_str = self.sides.source[self.sides.selected].raw_value();
+        let step_srt = format!("Current step: {side_str}");
+        Popup::render(step_srt, BorderStyle::Step, frame);
+    }
+    
+    fn render_throw_info(&self, frame: &mut Frame, throw: &Throw) {
+        let dice_1 = throw.dices[0].result;
+        let dice_2 = throw.dices[1].result;
+        let jackpot_res = if throw.is_jackpot { "Jackpot!" } else { "" };
+        let throw_str = format!("Throwed!\n Result: {dice_1} {dice_2} \n{jackpot_res}");
+        Popup::render(throw_str, BorderStyle::Throw, frame);
     }
 }
 
 // MARK: - Keys handling
 impl Controller {
     pub fn handle_key(&mut self, key_event: KeyEvent) {
-        match self.scene {
-            Scenes::GameMenu => self.handle_menu_keys(key_event),
-            Scenes::GameDeck => self.handle_game_keys(key_event),
+        if !self.state.mode_selected {
+            self.handle_mode_menu_keys(key_event);
+            return
+        }
+        if self.state.mode_selected && !self.state.side_selected {
+            self.handle_side_menu_keys(key_event);
+            return
+        }
+        if self.state.mode_selected && self.state.side_selected {
+            self.handle_game_keys(key_event);
+            return
         }
     }
     
-    fn handle_menu_keys(&mut self, key_event: KeyEvent) {
+    fn handle_mode_menu_keys(&mut self, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Up => {
-                self.menu.select_row(NavDirection::Up);
-            },
-            KeyCode::Down => {
-                self.menu.select_row(NavDirection::Down);
-            },
+            KeyCode::Up => { self.modes.toggle_selected(); },
+            KeyCode::Down => { self.modes.toggle_selected() },
             KeyCode::Enter => {
-                if self.mode.is_none() {
-                    self.on_select_mode();
-                } else {
-                    self.on_select_side();
-                } 
+                self.state.mode_selected = true;
+            }
+            _ => {}
+        }
+    }
+    
+    fn handle_side_menu_keys(&mut self, key_event: KeyEvent) {
+        match key_event.code {
+            KeyCode::Up => { self.sides.toggle_selected(); },
+            KeyCode::Down => { self.sides.toggle_selected() },
+            KeyCode::Enter => {
+                let selected_side = self.sides.source[self.sides.selected];
+                self.game = Some(Game::new(selected_side));
+                self.state.side_selected = true;
+                self.state.step_info_showed = true;
             }
             _ => {}
         }
@@ -121,40 +156,18 @@ impl Controller {
                 // ..
             },
             KeyCode::Char(' ') => {
-                if self.step_info_showed {
-                    self.step_info_showed = false;
-                    self.throw_info_showed = true;
+                if self.state.step_info_showed {
+                    self.game.as_mut().unwrap().throw();
+                    self.state.step_info_showed = false;
+                    self.state.throw_info_showed = true;
                 }
             },
             KeyCode::Enter => {
-                 if self.throw_info_showed {
-                     self.throw_info_showed = false;
+                 if self.state.throw_info_showed {
+                     self.state.throw_info_showed = false;
                  }
             }
             _ => {}
         }
-    }
-}
-
-// MARK: - Actions
-impl Controller {
-    fn on_select_mode(&mut self) {
-        self.mode = match self.menu.selected {
-            "Multiplayer" => Some(Mode::Multiplayer),
-            _ => Some(Mode::Singleplayer)
-        };
-        
-        self.menu = Menu::new("SELECT YOUR SIDE:", SIDES);
-    }
-    
-    fn on_select_side(&mut self) {
-        self.host_side = match self.menu.selected {
-            "Black" => Some(Side::Black),
-            _ => Some(Side::White)
-        };
-        
-        self.game = Some(Game::new(self.host_side.unwrap()));
-        self.scene = Scenes::GameDeck;
-        self.step_info_showed = true
     }
 }

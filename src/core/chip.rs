@@ -1,4 +1,4 @@
-use super::side::Side;
+use super::sides::Side;
 
 #[derive(Copy, Clone)]
 pub struct Chip {

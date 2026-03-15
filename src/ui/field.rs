@@ -5,19 +5,23 @@ use ratatui::{
 };
 
 use crate::core::{
-    side::Side,
-    deck::{Deck, SIDE_CHIPS}, row::Row, sector::Placement
+    row::Row, 
+    sides::Side,
+    sector::Placement,
+    deck::{Deck, SIDE_CHIPS}
 };
 
 pub struct Field {
-     border: &'static str,
-     empty_char: &'static str,
-     sector_layout: Layout
+    deck: Deck,
+    border: &'static str,
+    empty_char: &'static str,
+    sector_layout: Layout,
 }
 
 impl Field {
-    pub fn new() -> Self {
+    pub fn new(deck: Deck) -> Self {
         Field {
+            deck: deck,
             border: "I",
             empty_char: "-",
             sector_layout: Layout::vertical([
@@ -29,11 +33,7 @@ impl Field {
 
 // MARK: - Render
 impl<'a> Field {
-    pub fn render(
-        &mut self, frame: &'a mut Frame,
-        step_of: &Side,
-        deck: &Deck
-    ) {
+    pub fn render(self, frame: &'a mut Frame) {
         let area = frame.area();
         let width = area.width;
         let height = area.height;
@@ -58,7 +58,7 @@ impl<'a> Field {
             Constraint::Length(content_height / 2); 2
         ]).spacing(1); 
         
-        for sector in &deck.sectors {
+        for sector in &self.deck.sectors {
             match sector.placement {
                 Placement::A => {
                     for (index, row) in sector.rows.iter().enumerate() {
@@ -104,20 +104,6 @@ impl<'a> Field {
 
     fn draw_line(&self, row: &Row, right_aligned: bool) -> Text<'a> {
         let mut line = self.line(row);
-        
-        if let Some(chips) = row.chips {
-            let chip = if chips[0].side == Side::White { 
-                "⚪️"
-            } else { 
-                "⚫️"
-            };
-         
-            for index in 0..=SIDE_CHIPS - 1 {
-                if index <= SIDE_CHIPS - 1 {
-                    line[index] = chip
-                }
-            }
-        }
          
         if right_aligned {
             line.reverse();

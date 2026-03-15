@@ -1,7 +1,7 @@
 use super::{
     deck::Deck,
     player::Player, 
-    side::Side,
+    sides::Side,
     throw::Throw
 };
 
@@ -53,7 +53,10 @@ impl Game {
             Side::White => Side::Black,
             Side::Black => Side::White
         };
+    }
+    
+    pub fn throw(&mut self) {
         let throw = Throw::new();
-        println!("Step");
+        self.last_throw = throw;
     }
 }

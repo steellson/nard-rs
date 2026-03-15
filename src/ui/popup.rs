@@ -37,7 +37,7 @@ impl Popup {
         
         // Text 
         let text_rect = Rect::new(
-            popup_rect.width / 2 + 1, 
+            popup_rect.width / 2 + 2, 
             popup_rect.height / 2 + 1,
             popup_rect.width - 2,
             popup_rect.height - 2
