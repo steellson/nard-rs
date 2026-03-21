@@ -1,7 +1,7 @@
 use super::{
     deck::Deck,
     player::Player, 
-    sides::Side,
+    side::Side,
     throw::Throw
 };
 
@@ -11,37 +11,32 @@ pub struct Game {
     pub deck: Deck,
     pub step_of: Side,
     pub last_throw: Throw,
-    players: [Player; PLAYERS]
+    pub players: [Player; PLAYERS]
 }
 
 // MARK: - Build game
 impl Game {
-    pub fn new(host_side: Side) -> Self {
-        let opposite_side = match host_side {
-            Side::White => Side::Black,
-            Side::Black => Side::White
-        };
-        
+    pub fn new(players: [Player; PLAYERS]) -> Self {
         // Who step first ...
         // Jackpot isn't available
         let mut throw = Throw::new();
         while throw.is_jackpot { throw = Throw::new(); }
-        
+
+        let deck = Deck::new();
         let dices = &throw.dices;
+        
         let is_host_leader = dices[0].result > dices[1].result;
-        let fist_step_of = match is_host_leader {
+        let host_side = players.iter().find(|p| p.is_host).unwrap().side;
+        let step_of = match is_host_leader {
             true => host_side,
-            false => opposite_side
+            false => host_side.inverted()
         };
         
         Self {
-            step_of: fist_step_of,
-            deck: Deck::new(),
+            step_of: step_of,
+            deck: deck,
             last_throw: throw,
-            players: [
-                Player::new(host_side),
-                Player::new(opposite_side)
-            ],
+            players: players,
         }
     }
 }
@@ -49,10 +44,7 @@ impl Game {
 // MARK: - Step
 impl Game {
     pub fn step(&mut self) {
-        self.step_of = match self.step_of {
-            Side::White => Side::Black,
-            Side::Black => Side::White
-        };
+        self.step_of = self.step_of.inverted();
     }
     
     pub fn throw(&mut self) {

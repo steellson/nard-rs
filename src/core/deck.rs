@@ -1,5 +1,5 @@
 use super::sector::{Sector, Placement};
-use super::sides::Side;
+use super::side::Side;
 use super::chip::Chip;
 
 pub const SIDE_CHIPS: usize = 15;

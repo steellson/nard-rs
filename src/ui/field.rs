@@ -6,7 +6,7 @@ use ratatui::{
 
 use crate::core::{
     row::Row, 
-    sides::Side,
+    side::Side,
     sector::Placement,
     deck::{Deck, SIDE_CHIPS}
 };

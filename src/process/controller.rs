@@ -1,32 +1,34 @@
 use ratatui::Frame;
 use crossterm::event::{KeyCode, KeyEvent};
-use super::state::State;
+use super::state::{State, Flow};
 
-use crate::{core::throw::Throw, ui::{
-    menu::Menu, 
+use crate:: ui::{
+    menu::Menu,
     popup::Popup,
     field::Field,
-    border::{Border, BorderStyle}
-}};
+    border::{Border, BorderStyle},
+};
 use crate::core::{
     game::Game,
-    modes::Modes,
-    sides::Sides
+    throw::Throw,
+    player::Player,
+    mode::{Mode, ALL_MODES},
+    side::{Side, ALL_SIDES},
 };
 
 pub struct Controller {
-    modes: Modes,
-    sides: Sides,
     state: State,
     game: Option<Game>
 }
 
 impl Controller {
-    pub fn new() -> Self {        
+    pub fn new() -> Self {  
         Self { 
-            modes: Modes::new(),
-            sides: Sides::new(),
-            state: State::new(),
+            state: State::new(
+                Flow::Mode,
+                Mode::Singleplayer,
+                Side::White
+            ),
             game: None
         }
     }
@@ -42,24 +44,24 @@ impl Controller {
           return
         }
         // Select mode
-        if !self.state.mode_selected {
+        if self.state.flow == Flow::Mode {
             self.render_mode_menu(frame);
             return
         }
-        // Select host side
-        if !self.state.side_selected {
+        // Select side
+        if self.state.flow == Flow::Side {
             self.render_side_menu(frame);
             return
         }
         // Game process
         if let Some(g) = &self.game {
             // Step info
-            if self.state.step_info_showed {
-                self.render_step_info(frame);
+            if self.state.flow == Flow::Step {
+                self.render_step_info(frame, g);
                 return
             } 
             // Throw info
-            if self.state.throw_info_showed {
+            if self.state.flow == Flow::Throw {
                 self.render_throw_info(frame, &g.last_throw);
                 return
             }
@@ -69,33 +71,33 @@ impl Controller {
             Border::render(frame, BorderStyle::Game);
         }
     }
-    
+
     fn render_mode_menu(&self, frame: &mut Frame) {
-        let values = self.modes.source.map(|m| 
-            String::from(m.raw_value())
-        ).to_vec();
-        let selected = self.modes.selected;
+        let values: Vec<String> = ALL_MODES.iter()
+            .map(|m| m.raw_value().to_string())
+            .collect();
+        let selected = self.state.mode.raw_value();
         let menu = Menu::new("SELECT GAME MODE:", selected, values);
         menu.render(frame);
         Border::render(frame, BorderStyle::Menu);
     }
-    
+ 
     fn render_side_menu(&self, frame: &mut Frame) {
-        let values = self.sides.source.map(|m|
-            format!("{} chips", String::from(m.raw_value()))
-        ).to_vec();
-        let selected = self.sides.selected;
+        let values: Vec<String> = ALL_SIDES.iter()
+            .map(|m| m.raw_value().to_string())
+            .collect();
+        let selected = self.state.host_side.raw_value();
         let menu = Menu::new("SELECT YOUR SIDE:", selected, values);
         menu.render(frame);
         Border::render(frame, BorderStyle::Menu);
     }
-    
-    fn render_step_info(&self, frame: &mut Frame) {
-        let side_str = self.sides.source[self.sides.selected].raw_value();
-        let step_srt = format!("Current step: {side_str}");
-        Popup::render(step_srt, BorderStyle::Step, frame);
+
+    fn render_step_info(&self, frame: &mut Frame, game: &Game) {
+        let side_str = game.step_of.raw_value();
+        let step_str = format!("Current step: {side_str}");
+        Popup::render(step_str, BorderStyle::Step, frame);
     }
-    
+
     fn render_throw_info(&self, frame: &mut Frame, throw: &Throw) {
         let dice_1 = throw.dices[0].result;
         let dice_2 = throw.dices[1].result;
@@ -108,66 +110,65 @@ impl Controller {
 // MARK: - Keys handling
 impl Controller {
     pub fn handle_key(&mut self, key_event: KeyEvent) {
-        if !self.state.mode_selected {
-            self.handle_mode_menu_keys(key_event);
-            return
-        }
-        if self.state.mode_selected && !self.state.side_selected {
-            self.handle_side_menu_keys(key_event);
-            return
-        }
-        if self.state.mode_selected && self.state.side_selected {
-            self.handle_game_keys(key_event);
-            return
+        match self.state.flow {
+            Flow::Mode => self.handle_mode_menu_keys(key_event),
+            Flow::Side => self.handle_side_menu_keys(key_event),
+            _ => self.handle_game_keys(key_event)
         }
     }
-    
+
     fn handle_mode_menu_keys(&mut self, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Up => { self.modes.toggle_selected(); },
-            KeyCode::Down => { self.modes.toggle_selected() },
-            KeyCode::Enter => {
-                self.state.mode_selected = true;
-            }
+            KeyCode::Up => self.state.switch_mode(),
+            KeyCode::Down => self.state.switch_mode(),
+            KeyCode::Enter => self.state.next(),
             _ => {}
         }
     }
-    
+
     fn handle_side_menu_keys(&mut self, key_event: KeyEvent) {
         match key_event.code {
-            KeyCode::Up => { self.sides.toggle_selected(); },
-            KeyCode::Down => { self.sides.toggle_selected() },
+            KeyCode::Up => self.state.switch_host_side(),
+            KeyCode::Down => self.state.switch_host_side(),
             KeyCode::Enter => {
-                let selected_side = self.sides.source[self.sides.selected];
-                self.game = Some(Game::new(selected_side));
-                self.state.side_selected = true;
-                self.state.step_info_showed = true;
+                let host_side = self.state.host_side;
+                let host = Player::new(true, host_side);
+                let opposite = Player::new(false, host_side.inverted());
+                self.game = Some(Game::new([host, opposite]));
+                self.state.next();
             }
             _ => {}
         }
     }
     
     fn handle_game_keys(&mut self, key_event: KeyEvent) {
-        match key_event.code {
-            KeyCode::Up => {
-                // ...
-            },
-            KeyCode::Down => {
-                // ..
-            },
-            KeyCode::Char(' ') => {
-                if self.state.step_info_showed {
-                    self.game.as_mut().unwrap().throw();
-                    self.state.step_info_showed = false;
-                    self.state.throw_info_showed = true;
+        if let Some(g) = &mut self.game {
+            match key_event.code {
+                KeyCode::Up => {
+                    todo!("Select position");
+                },
+                KeyCode::Down => {
+                    todo!("Select position");
+                },
+                KeyCode::Char(' ') => {
+                    if self.state.flow == Flow::Step {
+                        g.throw();
+                        self.state.next();
+                    }
+                },
+                KeyCode::Enter => {
+                    if self.state.flow == Flow::Throw {
+                        self.state.next();
+                        return
+                    }
+                    if self.state.flow == Flow::Apply {
+                        g.step();
+                        self.state.next();
+                        return
+                    }
                 }
-            },
-            KeyCode::Enter => {
-                 if self.state.throw_info_showed {
-                     self.state.throw_info_showed = false;
-                 }
+                _ => {}
             }
-            _ => {}
         }
     }
 }

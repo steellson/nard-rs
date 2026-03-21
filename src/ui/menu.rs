@@ -8,19 +8,19 @@ use ratatui::{
 
 pub struct Menu {
     header: &'static str,
-    selected_index: usize,
+    selected: &'static str,
     items: Vec<String>
 }
 
 impl Menu {
     pub fn new(
         header: &'static str, 
-        selected_index: usize,
+        selected: &'static str,
         items: Vec<String>
     ) -> Self {
         Self {
             header: header,
-            selected_index: selected_index,
+            selected: selected,
             items: items,
         }
     }
@@ -76,7 +76,7 @@ impl<'a> Menu {
     
     fn rows(self) -> Vec<Row<'a>> {
         self.items.iter().map(|content| {
-            let text = if content == &self.items[self.selected_index] {
+            let text = if content == &self.selected {
                 Text::from(format!("█ {content}")).white()
             } else {
                 Text::from(format!("  {content}")).green()
