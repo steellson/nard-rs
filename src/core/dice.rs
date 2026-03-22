@@ -2,7 +2,7 @@ use rand;
 
 const MAX_VAL: u8 = 6;
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct Dice {
     pub result: u8
 }

@@ -1,16 +1,15 @@
 use super::{
     deck::Deck,
-    player::Player, 
-    side::Side,
-    throw::Throw
+    throw::Throw,
+    player::Player,
+    step::{Step, NavDirection}
 };
 
 const PLAYERS: usize = 2;
 
 pub struct Game {
     pub deck: Deck,
-    pub step_of: Side,
-    pub last_throw: Throw,
+    pub step: Step,
     pub players: [Player; PLAYERS]
 }
 
@@ -27,28 +26,62 @@ impl Game {
         
         let is_host_leader = dices[0].result > dices[1].result;
         let host_side = players.iter().find(|p| p.is_host).unwrap().side;
-        let step_of = match is_host_leader {
+        let step_of_side = match is_host_leader {
             true => host_side,
             false => host_side.inverted()
         };
+        let initial_step = Step::new(
+            step_of_side, 
+            throw,
+            None,
+            None,
+            0
+        );
         
         Self {
-            step_of: step_of,
             deck: deck,
-            last_throw: throw,
+            step: initial_step,
             players: players,
         }
     }
 }
 
-// MARK: - Step
+// MARK: - Methods
 impl Game {
-    pub fn step(&mut self) {
-        self.step_of = self.step_of.inverted();
+    pub fn make_throw(&mut self) {
+        self.step.throw = Throw::new();
     }
-    
-    pub fn throw(&mut self) {
-        let throw = Throw::new();
-        self.last_throw = throw;
+
+    pub fn select_row(&mut self, direction: NavDirection) {
+        match direction {
+            NavDirection::Up => {
+                todo!();
+            },
+            NavDirection::Down => {
+                todo!();
+            }
+        }
+    }
+
+    pub fn select_chip(&mut self, direction: NavDirection) {  
+        match direction {
+            NavDirection::Up => {
+                todo!();
+            },
+            NavDirection::Down => {
+                todo!();
+            }
+        }
+    }
+
+    pub fn apply_step(&mut self) {
+        // ... ???
+        self.step = Step::new(
+            self.step.side.inverted(),
+            self.step.throw,
+            None,
+            None,
+            4
+        );
     }
 }

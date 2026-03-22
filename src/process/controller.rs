@@ -12,6 +12,7 @@ use crate::core::{
     game::Game,
     throw::Throw,
     player::Player,
+    step::NavDirection,
     mode::{Mode, ALL_MODES},
     side::{Side, ALL_SIDES},
 };
@@ -62,7 +63,7 @@ impl Controller {
             } 
             // Throw info
             if self.state.flow == Flow::Throw {
-                self.render_throw_info(frame, &g.last_throw);
+                self.render_throw_info(frame, &g.step.throw);
                 return
             }
             // Game field 
@@ -93,7 +94,7 @@ impl Controller {
     }
 
     fn render_step_info(&self, frame: &mut Frame, game: &Game) {
-        let side_str = game.step_of.raw_value();
+        let side_str = game.step.side.raw_value();
         let step_str = format!("Current step: {side_str}");
         Popup::render(step_str, BorderStyle::Step, frame);
     }
@@ -145,14 +146,28 @@ impl Controller {
         if let Some(g) = &mut self.game {
             match key_event.code {
                 KeyCode::Up => {
-                    todo!("Select position");
+                    if self.state.flow == Flow::Select {
+                        g.select_row(NavDirection::Up);
+                        return
+                    }
+                    if self.state.flow == Flow::Apply {
+                        g.select_chip(NavDirection::Up);
+                        return
+                    }
                 },
                 KeyCode::Down => {
-                    todo!("Select position");
+                    if self.state.flow == Flow::Select {
+                        g.select_row(NavDirection::Down);
+                        return
+                    }
+                    if self.state.flow == Flow::Apply {
+                        g.select_chip(NavDirection::Down);
+                        return
+                    }
                 },
                 KeyCode::Char(' ') => {
                     if self.state.flow == Flow::Step {
-                        g.throw();
+                        g.make_throw();
                         self.state.next();
                     }
                 },
@@ -161,8 +176,12 @@ impl Controller {
                         self.state.next();
                         return
                     }
+                    if self.state.flow == Flow::Select {
+                        self.state.next();
+                        return
+                    }
                     if self.state.flow == Flow::Apply {
-                        g.step();
+                        g.apply_step();
                         self.state.next();
                         return
                     }

@@ -4,7 +4,8 @@ use super::deck::SIDE_CHIPS;
 #[derive(Clone, Copy)]
 pub struct Row {
     pub num: u8,
-    pub chips: Option<[Chip; SIDE_CHIPS]>
+    pub chips: Option<[Chip; SIDE_CHIPS]>,
+    pub selected: bool
 }
 
 impl Row {
@@ -14,7 +15,8 @@ impl Row {
     ) -> Self {
         Self { 
             num: num,
-            chips 
+            chips: chips,
+            selected: false
         }
     }
 }

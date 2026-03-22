@@ -2,6 +2,7 @@ use super::dice::Dice;
 
 pub const DICES: usize = 2;
 
+#[derive(Clone, Copy)]
 pub struct Throw {
     pub dices: [Dice; DICES],
     pub is_jackpot: bool

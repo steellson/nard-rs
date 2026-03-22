@@ -6,6 +6,7 @@ pub enum Flow {
     Side,
     Step,
     Throw,
+    Select,
     Apply
 }
 
@@ -41,7 +42,8 @@ impl State {
             Flow::Mode => Flow::Side,
             Flow::Side => Flow::Step,
             Flow::Step => Flow::Throw,
-            Flow::Throw => Flow::Apply,
+            Flow::Throw => Flow::Select,
+            Flow::Select => Flow::Apply,
             Flow::Apply => Flow::Step
         };
     }
